@@ -1090,14 +1090,16 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 			 * vdd->finger_mask_updated=true -> finger_mask brightness_update -> vdd->finger_mask_updated=false -> vrr brightness_update (OK)
 			 */
 
-			if (finger_mask_state != vdd->finger_mask) {
+			if (finger_mask_state == 0 && vdd->finger_mask == 1) {
 				mutex_lock(&vdd->vrr.vrr_lock);
-				SDE_INFO("[FINGER_MASK]updated finger mask mode %d\n", finger_mask_state);
-				vdd->finger_mask_updated = true;
-				vdd->finger_mask = finger_mask_state;
+				SDE_INFO("[FINGER_MASK]updated finger mask mode %d\n", vdd->finger_mask);
+				finger_mask_state = vdd->finger_mask;
 				ss_send_hbm_fingermask_image_tx(vdd, vdd->finger_mask);
+			} else if (finger_mask_state == 1 && vdd->finger_mask == 0) {
+				finger_mask_state = vdd->finger_mask;
 				vdd->finger_mask_updated = false;
 				mutex_unlock(&vdd->vrr.vrr_lock);
+				SDE_INFO("[FINGER_MASK]updated finger mask mode %d\n", vdd->finger_mask);
 			}
 		}
 	}
