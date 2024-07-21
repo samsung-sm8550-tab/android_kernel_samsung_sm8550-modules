@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/init.h>
@@ -380,7 +380,7 @@ static int cam_res_mgr_shared_pinctrl_select_state(
 		cam_res->pctrl_res[idx].pstatus = PINCTRL_STATUS_SUSPEND;
 	}
 
-	return rc;
+	return 0;
 }
 
 static int cam_res_mgr_add_device(struct device *dev,
@@ -442,6 +442,11 @@ int cam_res_mgr_gpio_request(struct device *dev, uint gpio,
 	bool                         gpio_found = false;
 	int                          pctrl_idx = -1;
 	struct cam_gpio_res         *gpio_res = NULL;
+
+	if (!cam_res) {
+		CAM_DBG(CAM_RES, "cam_res data is not avaialbe");
+		return -EINVAL;
+	}
 
 	mutex_lock(&cam_res->gpio_res_lock);
 	if (cam_res && cam_res->shared_gpio_enabled) {
@@ -578,9 +583,16 @@ static void cam_res_mgr_gpio_free(struct device *dev, uint gpio)
 	bool                   need_free = true;
 	int                    dev_num = 0;
 	struct cam_gpio_res   *gpio_res = NULL;
+	bool                   is_shared_gpio = false;
 	bool                   is_shared_pctrl_gpio = false;
 	int                    pctrl_idx = -1;
 
+	if (!cam_res) {
+		CAM_DBG(CAM_RES, "cam_res data is not avaialbe");
+		return;
+	}
+
+	is_shared_gpio = cam_res_mgr_gpio_is_in_shared_gpio(gpio);
 	is_shared_pctrl_gpio =
 			cam_res_mgr_gpio_is_in_shared_pctrl_gpio(gpio);
 
@@ -633,12 +645,8 @@ static void cam_res_mgr_gpio_free(struct device *dev, uint gpio)
 			pctrl_idx =
 				cam_res_mgr_util_get_idx_from_shared_pctrl_gpio(
 					gpio);
-			if (pctrl_idx >= 0) {
-				cam_res_mgr_shared_pinctrl_select_state(
-					pctrl_idx, false);
-			} else {
-				CAM_ERR(CAM_RES, "invalid pinctrl idx: %d", pctrl_idx);
-			}
+			cam_res_mgr_shared_pinctrl_select_state(
+				pctrl_idx, false);
 		}
 
 		CAM_DBG(CAM_RES, "freeing gpio: %u", gpio);
@@ -661,6 +669,11 @@ int cam_res_mgr_gpio_set_value(unsigned int gpio, int value)
 	int rc = 0;
 	bool found = false;
 	struct cam_gpio_res *gpio_res = NULL;
+
+	if (!cam_res) {
+		CAM_DBG(CAM_RES, "cam_res data is not avaialbe");
+		return -EINVAL;
+	}
 
 	mutex_lock(&cam_res->gpio_res_lock);
 	if (cam_res && cam_res->shared_gpio_enabled) {
@@ -707,7 +720,14 @@ static int cam_res_mgr_shared_pinctrl_init(
 	int i = 0;
 	char pctrl_active[50];
 	char pctrl_suspend[50];
-	struct cam_res_mgr_dt *dt = &cam_res->dt;
+	struct cam_res_mgr_dt *dt = NULL;
+
+	if (!cam_res) {
+		CAM_DBG(CAM_RES, "cam_res data is not avaialbe");
+		return -EINVAL;
+	}
+
+	dt = &cam_res->dt;
 
 	cam_res->pinctrl = devm_pinctrl_get(dev);
 	if (IS_ERR_OR_NULL(cam_res->pinctrl)) {
