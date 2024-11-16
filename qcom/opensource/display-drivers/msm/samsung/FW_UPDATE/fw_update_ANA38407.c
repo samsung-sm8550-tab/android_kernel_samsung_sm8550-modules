@@ -37,18 +37,25 @@ static u32 fw_id_read(struct samsung_display_driver_data *vdd)
 static int fw_check_ANA38407(struct samsung_display_driver_data *vdd, u32 fw_id)
 {
 	int ret = 0;
+
+#if IS_ENABLED(CONFIG_SEC_DEBUG)
 	u32 tried;
 
 	/* FW Print debug data & get try_count */
 	tried = ss_read_fw_up_debug_partition();
 	LCD_INFO(vdd, "FW_UP try_count:%x\n", tried);
+#endif
 
 	/* FirmWare Update : Limit tried number to avoid abnormal panel */
-	if (vdd->samsung_splash_enabled && !vdd->is_recovery_mode && (tried < 0x00000005)) {
+	if (vdd->samsung_splash_enabled && !vdd->is_recovery_mode 
+#if IS_ENABLED(CONFIG_SEC_DEBUG)
+	    && (tried < 0x00000005)
+#endif
+	    ) {
 		if (fw_id == 0x00000004) { // Add below for test: || fw_id == 0x00000005
 			LCD_INFO(vdd, "fw_id:%x => Need for FirmWare Update!!\n", fw_id);
 			ret = 1; /* Need update */
-		}  /* FW id && working check: 1stFW seems broken -> retry */
+		} /* FW id && working check: 1stFW seems broken -> retry */
 		else if ((fw_id == 0x00000000 && vdd->fw.fw_working == 0x0f) || vdd->fw.fw_working == 0x0c) {
 			LCD_INFO(vdd, "fw_id=%x, Working:0x%x-> Might have been failed.\n",
 				fw_id, vdd->fw.fw_working);
@@ -180,10 +187,14 @@ static int fw_write_ANA38407(struct samsung_display_driver_data *vdd)
 	}
 
 	if (mem_check_fail) {
+#if IS_ENABLED(CONFIG_SEC_DEBUG)
 		ss_write_fw_up_debug_partition(FW_UP_FAIL, 0);
+#endif
 		LCD_ERR(vdd, "FW Write/Read Failed!!!\n");
 	} else {
+#if IS_ENABLED(CONFIG_SEC_DEBUG)
 		ss_write_fw_up_debug_partition(FW_UP_PASS, 0);
+#endif
 		LCD_ERR(vdd, "FW Write/Read Passed!!!\n");
 	}
 
@@ -242,8 +253,9 @@ static int fw_update_ANA38407(struct samsung_display_driver_data *vdd)
 	ss_set_exclusive_tx_packet(vdd, RX_FW_READ_CHECK, 1);
 	ss_set_exclusive_tx_packet(vdd, RX_FW_READ_MTPID, 1);
 	ss_set_exclusive_tx_packet(vdd, TX_REG_READ_POS, 1);
-
+#if IS_ENABLED(CONFIG_SEC_DEBUG)
 	ss_write_fw_up_debug_partition(FW_UP_TRY, 0);
+#endif
 	fw_write_ANA38407(vdd);
 
 	/* exit exclusive mode*/
