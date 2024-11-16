@@ -115,6 +115,3 @@ obj-$(CONFIG_SND_SOC_TFA9878) += tfa9878_dlkm.o
 tfa9878_dlkm-y := $(TFA9878_OBJS)
 obj-$(CONFIG_SND_SOC_TFA9878) += tfa9878_sysfs_dlkm.o
 tfa9878_sysfs_dlkm-y := $(TFA9878_SYSFS_OBJS)
-
-# inject some build related information
-DEFINES += -DBUILD_TIMESTAMP=\"$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\"
