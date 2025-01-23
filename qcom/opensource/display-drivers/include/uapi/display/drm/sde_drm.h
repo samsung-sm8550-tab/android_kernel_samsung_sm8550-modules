@@ -545,6 +545,7 @@ struct sde_drm_roi_v1 {
 /**
  * sde fod dim layer
  */
+#define FOD_DIM_LAYER_ZORDER	0x20000001u
 #define FOD_PRESSED_LAYER_ZORDER	0x20000000u
 
 /**
