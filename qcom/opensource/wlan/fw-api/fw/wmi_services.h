@@ -708,6 +708,7 @@ typedef  enum  {
     WMI_SERVICE_PDEV_SUSPEND_EVENT_SUPPORT = 449, /* FW supports PDEV_SUSPEND event */
     WMI_SERVICE_PCC_MODE = 450, /* Indicates FW support for PCC (P2P Connection Compatibility) Mode */
 
+
     WMI_MAX_EXT2_SERVICE
 
 } WMI_SERVICE;
