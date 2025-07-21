@@ -344,7 +344,9 @@
 /*
  * <ini>
  * gTcpAdvWinScaleEnable - Control to enable  TCP adv window scaling
- * @Default: false
+ * @Min: 0
+ * @Max: 3
+ * @Default: 1
  *
  * This ini is used to enable dynamic configuration of TCP adv window scaling
  * system parameter.
