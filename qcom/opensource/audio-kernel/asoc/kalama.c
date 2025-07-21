@@ -2385,7 +2385,7 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev, int w
 
 		rc = of_property_read_u32(dev->of_node,
 				"qcom,mi2s-audio-intf", &val);
-		if (!rc && val && !sub_pcb_conn) {
+		if (!rc && val) {
 			dev_info(dev, "Add mi2s-audio-intf DAI link\n");
 			memcpy(msm_kalama_dai_links + total_links,
 					msm_mi2s_dai_links,

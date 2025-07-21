@@ -449,3 +449,4 @@ SND_SOC_DAILINK_DEFS(goodix_pri_tdm_tx_0,
 		COMP_CODEC("tfa98xx.18-0035", "tfa98xx-aif-18-35")),
 	DAILINK_COMP_ARRAY(COMP_PLATFORM("snd-soc-dummy")));
 #endif
+
