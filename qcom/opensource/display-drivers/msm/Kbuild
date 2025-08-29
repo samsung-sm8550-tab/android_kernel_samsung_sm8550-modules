@@ -349,6 +349,30 @@ ADD_NULL_CHR := $(shell $(SED) -i -e 's/\([0-9a-f]\)$$/\0, 0x00/' $(DISPLAY_ROOT
 msm_drm-$(CONFIG_PANEL_Q5_S6E3XA2_AMF756EJ01_QXGA) += samsung/Q5_S6E3XA2_AMF756EJ01/Q5_S6E3XA2_AMF756EJ01_panel.o
 endif
 
+ifeq ($(CONFIG_SEC_PLATFORM_B5Q), y)
+include $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FC5_AMB338EH01/B5_S6E3FC5_AMB338EH01.conf
+ccflags-y +=	-include $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FC5_AMB338EH01/B5_S6E3FC5_AMB338EH01.h
+
+#Translate .dat file to .h to cover the case which can not use request_firmware(Recovery Mode)
+CLEAR_TMP := $(shell rm -f B5_S6E3FC5_AMB338EH01_PDF_DATA)
+COPY_TO_HERE := $(shell cp -vf $(DISPLAY_ROOT)/msm/samsung/panel_data_file/B5_S6E3FC5_AMB338EH01.dat B5_S6E3FC5_AMB338EH01_PDF_DATA)
+DATA_TO_HEX := $(shell $(XXD) -i B5_S6E3FC5_AMB338EH01_PDF_DATA > $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FC5_AMB338EH01/B5_S6E3FC5_AMB338EH01_PDF.h)
+ADD_NULL_CHR := $(shell $(SED) -i -e 's/\([0-9a-f]\)$$/\0, 0x00/' $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FC5_AMB338EH01/B5_S6E3FC5_AMB338EH01_PDF.h)
+
+msm_drm-$(CONFIG_PANEL_B5_S6E3FC5_AMB338EH01_SVGA) += samsung/B5_S6E3FC5_AMB338EH01/B5_S6E3FC5_AMB338EH01_panel.o
+
+include $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FAC_AMF670BS03/B5_S6E3FAC_AMF670BS03.conf
+ccflags-y +=	-include $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FAC_AMF670BS03/B5_S6E3FAC_AMF670BS03.h
+
+#Translate .dat file to .h to cover the case which can not use request_firmware(Recovery Mode)
+CLEAR_TMP := $(shell rm -f B5_S6E3FAC_AMF670BS03_PDF_DATA)
+COPY_TO_HERE := $(shell cp -vf $(DISPLAY_ROOT)/msm/samsung/panel_data_file/B5_S6E3FAC_AMF670BS03.dat B5_S6E3FAC_AMF670BS03_PDF_DATA)
+DATA_TO_HEX := $(shell $(XXD) -i B5_S6E3FAC_AMF670BS03_PDF_DATA > $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FAC_AMF670BS03/B5_S6E3FAC_AMF670BS03_PDF.h)
+ADD_NULL_CHR := $(shell $(SED) -i -e 's/\([0-9a-f]\)$$/\0, 0x00/' $(DISPLAY_ROOT)/msm/samsung/B5_S6E3FAC_AMF670BS03/B5_S6E3FAC_AMF670BS03_PDF.h)
+
+msm_drm-$(CONFIG_PANEL_B5_S6E3FAC_AMF670BS03_FHD) += samsung/B5_S6E3FAC_AMF670BS03/B5_S6E3FAC_AMF670BS03_panel.o
+endif
+
 include $(DISPLAY_ROOT)/msm/samsung/panel_common.conf
 ccflags-y +=	-include $(DISPLAY_ROOT)/msm/samsung/panel_common_conf.h
 
