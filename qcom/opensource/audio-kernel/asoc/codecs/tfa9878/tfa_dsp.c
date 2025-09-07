@@ -14,6 +14,7 @@
 #include "inc/tfa.h"
 #include "inc/tfa98xx_tfafieldnames.h"
 #include "inc/tfa_internal.h"
+#include "inc/tfa_error_map.h"
 
 #ifndef MIN
 #define MIN(A, B) ((A < B) ? A : B)
@@ -1236,7 +1237,7 @@ int tfa_calibrate(struct tfa_device *tfa)
 	tfa->is_cold = 1;
 
 	/* clear mtpex */
-	error = tfa_dev_mtp_set(tfa, TFA_MTP_EX, 0);
+	error = tfa_to_tfa98xx_err(tfa_dev_mtp_set(tfa, TFA_MTP_EX, 0));
 	if (error) {
 		pr_info("resetting MTPEX failed (%d)\n", error);
 		tfa->reset_mtpex = 1; /* suspend until TFA98xx is active */
@@ -3809,8 +3810,8 @@ enum tfa98xx_error tfa_wait_cal(struct tfa_device *tfa)
 			pr_info("%s: apply the whole profile setting at success\n",
 				__func__);
 
-			err = tfa_dev_switch_profile(ntfa,
-				ntfa->next_profile, ntfa->vstep);
+			err = tfa_to_tfa98xx_err(tfa_dev_switch_profile(ntfa,
+				ntfa->next_profile, ntfa->vstep));
 			if (err != TFA98XX_ERROR_OK)
 				pr_err("%s: error in switch profile (%d)\n",
 					__func__, err);
@@ -4350,7 +4351,7 @@ tfa_dev_start_exit:
 		tfa_set_status_flag(tfa, TFA_SET_DEVICE, -1);
 	mutex_unlock(&dev_lock);
 
-	return err;
+	return tfa98xx_to_tfa_err(err);
 }
 
 enum tfa_error tfa_dev_switch_profile(struct tfa_device *tfa,
@@ -4375,7 +4376,7 @@ enum tfa_error tfa_dev_switch_profile(struct tfa_device *tfa,
 
 		err = tfa_cont_write_profile(tfa, next_profile, vstep);
 		if (err != TFA98XX_ERROR_OK)
-			return err;
+			return tfa98xx_to_tfa_err(err);
 	}
 
 	/* If the profile contains the .standby suffix go
@@ -4387,9 +4388,9 @@ enum tfa_error tfa_dev_switch_profile(struct tfa_device *tfa,
 
 		pr_info("%s: skip switching dev %d for standby profile\n",
 			__func__, tfa->dev_idx);
-		err = tfa_dev_stop(tfa);
+		err = tfa_to_tfa98xx_err(tfa_dev_stop(tfa));
 
-		return err;
+		return tfa98xx_to_tfa_err(err);
 	} else if (TFA_GET_BF(tfa, PWDN) != 0) {
 		err = tfa98xx_powerdown(tfa, 0);
 	}
@@ -4401,18 +4402,18 @@ enum tfa_error tfa_dev_switch_profile(struct tfa_device *tfa,
 		&& (vstep != tfa->vstep) && (vstep != -1)) {
 		err = tfa_cont_write_files_vstep(tfa, next_profile, vstep);
 		if (err != TFA98XX_ERROR_OK)
-			return err;
+			return tfa98xx_to_tfa_err(err);
 	}
 
 	/* Always search and apply filters after a startup */
 	err = tfa_set_filters(tfa, next_profile);
 	if (err != TFA98XX_ERROR_OK)
-		return err;
+		return tfa98xx_to_tfa_err(err);
 
 	tfa_dev_set_swprof(tfa, (unsigned short)next_profile);
 	tfa_dev_set_swvstep(tfa, (unsigned short)vstep);
 
-	return err;
+	return tfa98xx_to_tfa_err(err);
 }
 
 enum tfa_error tfa_dev_stop(struct tfa_device *tfa)
@@ -4436,7 +4437,7 @@ enum tfa_error tfa_dev_stop(struct tfa_device *tfa)
 	/* powerdown CF */
 	err = tfa98xx_powerdown(tfa, 1);
 	if (err != TFA98XX_ERROR_OK)
-		return err;
+		return tfa98xx_to_tfa_err(err);
 
 	/* disable I2S output on TFA1 devices without TDM */
 	err = tfa98xx_aec_output(tfa, 0);
@@ -4472,7 +4473,7 @@ enum tfa_error tfa_dev_stop(struct tfa_device *tfa)
 		tfa_reset_active_handle(tfa);
 	}
 
-	return err;
+	return tfa98xx_to_tfa_err(err);
 }
 
 /*
@@ -5567,14 +5568,14 @@ enum tfa_error tfa_dev_mtp_set(struct tfa_device *tfa,
 
 	switch (item) {
 	case TFA_MTP_OTC:
-		err = tfa98xx_set_mtp(tfa, (uint16_t)
+		err = tfa98xx_to_tfa_err(tfa98xx_set_mtp(tfa, (uint16_t)
 			(value << TFA98XX_KEY2_PROTECTED_MTP0_MTPOTC_POS),
-			TFA98XX_KEY2_PROTECTED_MTP0_MTPOTC_MSK);
+			TFA98XX_KEY2_PROTECTED_MTP0_MTPOTC_MSK));
 		break;
 	case TFA_MTP_EX:
-		err = tfa98xx_set_mtp(tfa, (uint16_t)
+		err = tfa98xx_to_tfa_err(tfa98xx_set_mtp(tfa, (uint16_t)
 			(value << TFA98XX_KEY2_PROTECTED_MTP0_MTPEX_POS),
-			TFA98XX_KEY2_PROTECTED_MTP0_MTPEX_MSK);
+			TFA98XX_KEY2_PROTECTED_MTP0_MTPEX_MSK));
 		if (err == tfa_error_ok) {
 			tfa->mtpex = value;
 			if (value == 0)

@@ -29,6 +29,7 @@
 #include "inc/tfa98xx.h"
 #include "inc/tfa.h"
 #include "inc/tfa_internal.h"
+#include "inc/tfa_error_map.h"
 
 #include "inc/tfa98xx_tfafieldnames.h"
 
@@ -1376,7 +1377,7 @@ static int tfa98xx_run_calibration(struct tfa98xx *tfa98xx0)
 	}
 
 	/* EXT_TEMP */
-	ret = tfa98xx_read_reference_temp(&temp_val);
+	ret = tfa98xx_to_tfa_err(tfa98xx_read_reference_temp(&temp_val));
 	if (ret) {
 		pr_err("%s: error in reading reference temp\n",
 			__func__);
@@ -5010,8 +5011,8 @@ void tfa_restore_after_cal(int index, int cal_err)
 			pr_info("%s: apply the whole profile setting\n",
 				__func__);
 
-			err = tfa_dev_switch_profile(ntfa,
-				ntfa->next_profile, ntfa->vstep);
+			err = tfa_to_tfa98xx_err(tfa_dev_switch_profile(ntfa,
+				ntfa->next_profile, ntfa->vstep));
 			if (err != TFA98XX_ERROR_OK)
 				pr_err("%s: error in switch profile (%d)\n",
 					__func__, err);
