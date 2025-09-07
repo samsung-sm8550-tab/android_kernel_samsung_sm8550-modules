@@ -1336,7 +1336,7 @@ static void tfa98xx_debug_remove(struct tfa98xx *tfa98xx)
 }
 #endif /* CONFIG_DEBUG_FS */
 
-static void tfa98xx_check_calibration(struct tfa98xx *tfa98xx)
+static void __maybe_unused tfa98xx_check_calibration(struct tfa98xx *tfa98xx)
 {
 	unsigned short value = 0;
 
