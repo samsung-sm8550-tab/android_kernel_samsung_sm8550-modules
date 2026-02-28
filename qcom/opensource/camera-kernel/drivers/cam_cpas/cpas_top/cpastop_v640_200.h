@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef _CPASTOP_V640_200_H_
@@ -204,7 +204,7 @@ static struct cam_camnoc_specific
 			.value = 0x0,
 		},
 		.maxwr_low = {
-			.enable = true,
+			.enable = false,
 			.access_type = CAM_REG_TYPE_READ,
 			.masked_value = 0,
 			.offset = 0x5820, /* TFE_BAYER_NIU_MAXWR_LOW */
@@ -280,7 +280,7 @@ static struct cam_camnoc_specific
 			.value = 0x0,
 		},
 		.maxwr_low = {
-			.enable = true,
+			.enable = false,
 			.access_type = CAM_REG_TYPE_READ,
 			.masked_value = 0,
 			.offset = 0x5A20, /* TFE_RDI_NIU_MAXWR_LOW */
@@ -547,9 +547,6 @@ static struct cam_camnoc_err_logger_info cam640_cpas200_err_logger_offsets = {
 };
 
 static struct cam_cpas_hw_errata_wa_list cam640_cpas200_errata_wa_list = {
-	.enable_icp_clk_for_qchannel = {
-		.enable = true,
-	},
 };
 
 static struct cam_camnoc_info cam640_cpas200_camnoc_info = {

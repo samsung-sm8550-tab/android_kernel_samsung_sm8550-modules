@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/debugfs.h>
@@ -80,24 +80,6 @@ static int __cam_node_handle_query_cap(struct cam_node *node,
 
 	if (node->hw_mgr_intf.hw_get_caps) {
 		rc = node->hw_mgr_intf.hw_get_caps(
-			node->hw_mgr_intf.hw_mgr_priv, query);
-	}
-
-	return rc;
-}
-
-static int __cam_node_handle_query_cap_v2(struct cam_node *node,
-	struct cam_query_cap_cmd *query)
-{
-	int rc = -EFAULT;
-
-	if (!query) {
-		CAM_ERR(CAM_CORE, "Invalid params");
-		return -EINVAL;
-	}
-
-	if (node->hw_mgr_intf.hw_get_caps_v2) {
-		rc = node->hw_mgr_intf.hw_get_caps_v2(
 			node->hw_mgr_intf.hw_mgr_priv, query);
 	}
 
@@ -815,28 +797,6 @@ int cam_node_handle_ioctl(struct cam_node *node, struct cam_control *cmd)
 
 		break;
 	}
-	case CAM_QUERY_CAP_V2:{
-		struct cam_query_cap_cmd query;
-
-		if (copy_from_user(&query, u64_to_user_ptr(cmd->handle),
-			sizeof(query))) {
-			rc = -EFAULT;
-			break;
-		}
-
-		rc = __cam_node_handle_query_cap_v2(node, &query);
-		if (rc) {
-			CAM_ERR(CAM_CORE, "querycap is failed(rc = %d)",
-				rc);
-			break;
-		}
-
-		if (copy_to_user(u64_to_user_ptr(cmd->handle), &query,
-			sizeof(query)))
-			rc = -EFAULT;
-
-		break;
-	}
 	case CAM_ACQUIRE_DEV: {
 		struct cam_acquire_dev_cmd acquire;
 
@@ -858,7 +818,6 @@ int cam_node_handle_ioctl(struct cam_node *node, struct cam_control *cmd)
 	}
 	case CAM_ACQUIRE_HW: {
 		uint32_t api_version;
-		uint32_t struct_version;
 		void *acquire_ptr = NULL;
 		size_t acquire_size;
 
@@ -893,16 +852,6 @@ int cam_node_handle_ioctl(struct cam_node *node, struct cam_control *cmd)
 		}
 
 		if (api_version == 1) {
-			struct_version =
-				((struct cam_acquire_hw_cmd_v1 *)acquire_ptr)->struct_version;
-			if (struct_version != api_version) {
-				CAM_ERR(CAM_CORE,
-					"Unmatched struct api version %u and struct version %u",
-					api_version, struct_version);
-				rc = -EINVAL;
-				goto acquire_kfree;
-			}
-
 			rc = __cam_node_handle_acquire_hw_v1(node, acquire_ptr);
 			if (rc) {
 				CAM_ERR(CAM_CORE,
@@ -910,16 +859,6 @@ int cam_node_handle_ioctl(struct cam_node *node, struct cam_control *cmd)
 				goto acquire_kfree;
 			}
 		} else if (api_version == 2) {
-			struct_version =
-				((struct cam_acquire_hw_cmd_v2 *)acquire_ptr)->struct_version;
-			if (struct_version != api_version) {
-				CAM_ERR(CAM_CORE,
-					"Unmatched struct api version %u and struct version %u",
-					api_version, struct_version);
-				rc = -EINVAL;
-				goto acquire_kfree;
-			}
-
 			rc = __cam_node_handle_acquire_hw_v2(node, acquire_ptr);
 			if (rc) {
 				CAM_ERR(CAM_CORE,
@@ -1053,11 +992,6 @@ release_kfree:
 	case CAM_DUMP_REQ: {
 		struct cam_dump_req_cmd dump;
 
-		if (!cam_debugfs_available())
-		{
-			CAM_DBG(CAM_CORE, "Dump request disabled");
-			return 0;
-		}
 		if (copy_from_user(&dump, u64_to_user_ptr(cmd->handle),
 			sizeof(dump))) {
 			rc = -EFAULT;

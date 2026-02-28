@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/device.h>
@@ -310,11 +310,6 @@ static int cam_cpas_parse_mnoc_node(struct cam_cpas *cpas_core,
 			return -EPERM;
 		}
 
-		if (*mnoc_idx >= CAM_CPAS_MAX_AXI_PORTS) {
-			CAM_ERR(CAM_CPAS, "Invalid mnoc index: %d", *mnoc_idx);
-			return -EINVAL;
-		}
-
 		cpas_core->axi_port[*mnoc_idx].axi_port_node = mnoc_node;
 		rc =  of_property_read_string(curr_node_ptr->tree_dev_node, "qcom,axi-port-name",
 			&cpas_core->axi_port[*mnoc_idx].bus_client.common_data.name);
@@ -611,6 +606,8 @@ static int cam_cpas_parse_node_tree(struct cam_cpas *cpas_core,
 	return 0;
 }
 
+
+
 int cam_cpas_get_hw_features(struct platform_device *pdev,
 	struct cam_cpas_private_soc *soc_private)
 {
@@ -627,9 +624,11 @@ int cam_cpas_get_hw_features(struct platform_device *pdev,
 
 	CAM_DBG(CAM_CPAS, "fuse info elements count %d", count);
 
-	if (count <= 0)
+	if (count <= 0) {
+		CAM_INFO(CAM_CPAS, "No or invalid fuse entries count: %d",
+			count);
 		goto end;
-	else if (count%5 != 0) {
+	} else if (count%5 != 0) {
 		CAM_INFO(CAM_CPAS, "fuse entries should be multiple of 5 %d",
 			count);
 		goto end;
