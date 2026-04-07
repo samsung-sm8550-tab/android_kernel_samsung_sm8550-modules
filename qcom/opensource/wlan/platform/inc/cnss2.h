@@ -455,6 +455,10 @@ extern bool cnss_get_fw_cap(struct device *dev, enum cnss_fw_caps fw_cap);
 extern bool cnss_audio_is_direct_link_supported(struct device *dev);
 extern bool cnss_ipa_wlan_shared_smmu_supported(struct device *dev);
 extern int cnss_set_wfc_mode(struct device *dev, struct cnss_wfc_cfg cfg);
+//#ifdef CONFIG_SEC_SS_CNSS_FEATURE_SYSFS
+extern int cnss_sysfs_get_pm_info(void);
+extern void cnss_sysfs_update_driver_status(int32_t new_status, void *version, void *softap);
+//#endif /*CONFIG_SEC_SS_CNSS_FEATURE_SYSFS*/
 extern int cnss_thermal_cdev_register(struct device *dev,
 				      unsigned long max_state,
 				      int tcdev_id);

@@ -631,7 +631,10 @@ struct cnss_plat_data {
 	struct cnss_dms_data dms;
 	int power_up_error;
 	u32 hw_trc_override;
+#ifdef CONFIG_SEC_SS_CNSS_FEATURE_SYSFS
 	u8 charger_mode;
+	struct completion macloader_done;
+#endif
 	struct mbox_client mbox_client_data;
 	struct mbox_chan *mbox_chan;
 	struct qmp *qmp;
