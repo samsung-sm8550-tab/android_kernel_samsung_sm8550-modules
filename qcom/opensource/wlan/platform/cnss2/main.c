@@ -5113,6 +5113,17 @@ static void cnss_init_control_params(struct cnss_plat_data *plat_priv)
 	 * enabled by default
 	 */
 	plat_priv->adsp_pc_enabled = true;
+
+	/* Enable WLAN recovery by default so a firmware crash triggers a soft
+	 * recovery (shutdown -> ramdump -> powerup) instead of a kernel panic.
+	 * Platforms that explicitly require the panic behaviour can opt out by
+	 * setting the "qcom,wlan-recovery-disabled" property in their DT node.
+	 */
+	plat_priv->recovery_enabled = 1;
+	if (plat_priv->plat_dev->dev.of_node &&
+	    of_property_read_bool(plat_priv->plat_dev->dev.of_node,
+				  "qcom,wlan-recovery-disabled"))
+		plat_priv->recovery_enabled = 0;
 }
 
 static void cnss_get_pm_domain_info(struct cnss_plat_data *plat_priv)
