@@ -188,12 +188,15 @@ static int samsung_panel_on_post(struct samsung_display_driver_data *vdd)
 		vdd->self_disp.self_mask_on(vdd, true);
 	else {
 		LCD_ERR(vdd, "Selfmask CheckSum Error. Skip Self Mask On!\n");
+#if IS_ENABLED(CONFIG_SEC_DEBUG)
 		if (sec_debug_is_enabled())
 			panic("Display Selfmask CheckSum Error\n");
+#endif
 	}
 
 	LCD_INFO(vdd, "manufacture_id_dsi=%x\n", vdd->manufacture_id_dsi);
 	/* Tab S9 FW Update Panel Target LCD_ID = 0x800003 ~ 0x800004 */
+#if IS_ENABLED(CONFIG_SEC_DEBUG)
 	if (sec_debug_is_enabled() && (vdd->manufacture_id_dsi == 0x800003 || vdd->manufacture_id_dsi == 0x800004) && vdd->fw.is_support) {
 		int ret = 0;
 
@@ -207,6 +210,7 @@ static int samsung_panel_on_post(struct samsung_display_driver_data *vdd)
 		if (ret == 1)
 			vdd->fw.fw_update(vdd);
 	}
+#endif
 
 	/* SP Flash Initialize */
 	if (vdd->gct.on && ss_sp_flash_init_check(vdd)) {
