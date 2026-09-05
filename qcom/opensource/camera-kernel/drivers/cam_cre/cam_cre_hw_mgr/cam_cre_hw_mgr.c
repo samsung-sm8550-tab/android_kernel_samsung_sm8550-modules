@@ -1375,6 +1375,14 @@ static int cam_cre_mgr_process_io_cfg(struct cam_cre_hw_mgr *hw_mgr,
 				}
 			} else {
 				if (io_buf->fence != -1) {
+					if (k >= CAM_CTX_REQ_MAX) {
+						CAM_ERR(CAM_CRE,
+							"Couldn't update fence %d for out_res %d due to out_map_entries index %d greater than max %d",
+							io_buf->fence, io_buf->resource_type, k,
+							CAM_CTX_REQ_MAX);
+						rc = -EINVAL;
+						goto end;
+					}
 					prep_arg->out_map_entries[k].sync_id =
 						io_buf->fence;
 					k++;
@@ -1592,6 +1600,9 @@ static int cam_cre_get_acquire_info(struct cam_cre_hw_mgr *hw_mgr,
 		return -EFAULT;
 	}
 
+	if (cam_cre_validate_acquire_res_info(&ctx->cre_acquire))
+		return -EINVAL;
+
 	CAM_DBG(CAM_CRE, "top: %u %s %u %u %u",
 		ctx->cre_acquire.dev_type,
 		ctx->cre_acquire.dev_name,
@@ -1613,9 +1624,6 @@ static int cam_cre_get_acquire_info(struct cam_cre_hw_mgr *hw_mgr,
 		ctx->cre_acquire.out_res[i].height,
 		ctx->cre_acquire.out_res[i].format);
 	}
-
-	if (cam_cre_validate_acquire_res_info(&ctx->cre_acquire))
-		return -EINVAL;
 
 	return 0;
 }
