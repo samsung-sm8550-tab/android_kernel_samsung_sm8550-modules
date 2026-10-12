@@ -49,5 +49,8 @@
 #define CONFIG_MSM_EXT_DISPLAY 1
 //#define CONFIG_AUDIO_TRACE_PRINTK 1
 #define CONFIG_COMMON_AMP_CIRRUS 1
+/* The haptic DAI requires a built-in or modular CS40L26 codec. */
+#if IS_ENABLED(CONFIG_SND_SOC_CS40L26)
 #define CONFIG_USE_CS40L26 1
+#endif
 //#define CONFIG_SEC_SND_DEBUG 1
